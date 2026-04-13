@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JS Minecraft Clone</title>
+    <style>
+        @font-face {
+    font-family: 'MinecraftMain';
+    src: url('./assets/minecraft/fonts/general/minecraft.otf') format('opentype');
+}
+
+/* This applies it to any HTML elements (menus, overlays, etc.) */
+body, html {
+    font-family: 'MinecraftMain', sans-serif;
+}
+
+
+        
+        body { margin: 0; overflow: hidden; background: #78A7FF; }
+        #game { width: 100vw; height: 100vh; display: block; }
+
+        #crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 32px;
+            height: 32px;
+            mix-blend-mode: difference;
+            filter: saturate(0) brightness(1.2);
+            background: url('./assets/minecraft/textures/gui/sprites/hud/crosshair.png') no-repeat center;
+            background-size: contain;
+            image-rendering: pixelated;
+            pointer-events: none;
+        }
+
+        
+    </style>
+</head>
+
+<body>
+    <div id="crosshair"></div>
+
+    <div id="info" style="position: absolute; top: 10px; left: 10px; color: white; font-family: MinecraftMain; background: rgba(0,0,0,0.5); padding: 5px;">
+        Facing: <span id="dirfacing">N</span><br>
+        XYZ: <span id="coords">0 / 0 / 0</span><br>
+        Speed: <span id="speed">0.00</span> bps
+    </div>
+
+    <canvas id="game"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+
+    <!-- 1. WORLD DATA / GEN -->
+    <script src="worldgen.js"></script>
+    <script src="biomes.js"></script>
+    <script src="block.js"></script>
+
+    <!-- 2. CORE WORLD / RENDER -->
+<!-- 2. CORE WORLD / RENDER -->
+<script src="world.js"></script>
+<script src="playermodel.js"></script>
+
+    <!-- 3. ENTITIES / PHYSICS -->
+    <script src="entity.js"></script>
+    <script src="physics.js"></script>
+    <script src="player.js"></script>
+
+    <!-- 4. GAME LOOP -->
+    <script src="tick.js"></script>
+
+    <!-- 5. UI SYSTEM (NEW) -->
+    <script src="button.js"></script>
+    <script src="game_menu.js"></script>
+    <script src="options_menu.js"></script>
+
+</body>
+</html>
