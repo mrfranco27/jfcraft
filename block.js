@@ -45,20 +45,20 @@ const Block = {
             GRASS: {
                 tint: { top: true },
                 textures: [
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_block_side.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_block_side.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_block_top.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/dirt.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_block_side.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_block_side.png'
+                    'assets/minecraft/textures/block/grass_block_side.png',
+                    'assets/minecraft/textures/block/grass_block_side.png',
+                    'assets/minecraft/textures/block/grass_block_top.png',
+                    'assets/minecraft/textures/block/dirt.png',
+                    'assets/minecraft/textures/block/grass_block_side.png',
+                    'assets/minecraft/textures/block/grass_block_side.png'
                 ],
                 overlays: [
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_side_overlay.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_side_overlay.png',
+                    'assets/minecraft/textures/block/grass_side_overlay.png',
+                    'assets/minecraft/textures/block/grass_side_overlay.png',
                     null,
                     null,
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_side_overlay.png',
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/grass_side_overlay.png'
+                    'assets/minecraft/textures/block/grass_side_overlay.png',
+                    'assets/minecraft/textures/block/grass_side_overlay.png'
                 ]
             },
 
