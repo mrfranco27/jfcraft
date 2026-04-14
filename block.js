@@ -109,7 +109,7 @@ const Block = {
 
         for (let x = 0; x < 16; x++) {
             for (let z = 0; z < 16; z++) {
-                for (let y = 0; y < 80; y++) {
+                for (let y = 0; y < 256; y++) {
 
                     const wx = cx * 16 + x;
                     const wz = cz * 16 + z;

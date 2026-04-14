@@ -43,15 +43,21 @@ function animate() {
         const now = performance.now();
         let partialTick = (now - lastTickTime) / TICK_RATE;
         if (partialTick > 1.0) partialTick = 1.0;
-        
+
         window.mainPlayer.renderUpdate(partialTick);
-        
+
+        // --- SKYBOX SYNC ---
+        // Keep sky centered on player and update darkening factor
+        if (window.skyMesh && window.skyMat) {
+            window.skyMesh.position.copy(window.camera.position);
+            window.skyMat.uniforms.cameraY.value = window.camera.position.y;
+        }
+
         // 1. Calculate and sync FOV
         const targetFOV = window.mainPlayer.sprinting ? 99 : 90;
-        window.camera.fov = THREE.MathUtils.lerp(window.camera.fov, targetFOV, 0.2); 
+        window.camera.fov = THREE.MathUtils.lerp(window.camera.fov, targetFOV, 0.2);
         window.camera.updateProjectionMatrix();
 
-        // SYNC HAND FOV: This makes the hand feel "attached" to your vision
         if (window.uiCam) {
             window.uiCam.fov = window.camera.fov;
             window.uiCam.updateProjectionMatrix();
@@ -60,11 +66,11 @@ function animate() {
         // 2. Dual Render Pass
         window.renderer.autoClear = false;
         window.renderer.clear();
-        
-        // Render World
+
+        // Render World (Skybox is part of this scene)
         window.renderer.render(window.scene, window.camera);
-        
-        // Render Hand (Now 3D Perspective)
+
+        // Render Hand
         window.renderer.clearDepth();
         if (window.uiScene && window.uiCam) {
             window.renderer.render(window.uiScene, window.uiCam);
@@ -73,5 +79,4 @@ function animate() {
         updateUI();
     }
 }
-
 animate();
