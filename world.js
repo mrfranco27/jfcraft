@@ -58,7 +58,7 @@ void main() {
     vec3 finalColor = mix(dynamicBottom, topColor, transition);
 
     // 6. Minecraft 1.12.2 Void darkening
-    float voidFactor = clamp(cameraY / 0.0, 0.0, 1.0);
+    float voidFactor = clamp(cameraY / 1.0, 0.0, 1.0);
     gl_FragColor = vec4(finalColor * voidFactor, 1.0);
 }
 `;

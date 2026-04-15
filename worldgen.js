@@ -53,7 +53,7 @@ class ChunkGenerator {
 
         const chunk = new Chunk(chunkX, chunkZ);
 
-        const height = 99; // 👈 flat surface height
+        const height = 29; // 👈 flat surface height
 
         for (let x = 0; x < 16; x++) {
             for (let z = 0; z < 16; z++) {

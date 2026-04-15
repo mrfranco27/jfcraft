@@ -2,21 +2,25 @@
 <html>
 <head>
     <title>JS Minecraft Clone</title>
+
     <style>
         @font-face {
-    font-family: 'MinecraftMain';
-    src: url('./assets/minecraft/fonts/general/minecraft.otf') format('opentype');
-}
+            font-family: 'MinecraftMain';
+            src: url('./assets/minecraft/fonts/general/minecraft.otf') format('opentype');
+        }
 
-/* This applies it to any HTML elements (menus, overlays, etc.) */
-body, html {
-    font-family: 'MinecraftMain', sans-serif;
-}
+        body, html {
+            font-family: 'MinecraftMain', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background: #78A7FF;
+        }
 
-
-        
-        body { margin: 0; overflow: hidden; background: #78A7FF; }
-        #game { width: 100vw; height: 100vh; display: block; }
+        #game {
+            width: 100vw;
+            height: 100vh;
+            display: block;
+        }
 
         #crosshair {
             position: absolute;
@@ -32,15 +36,14 @@ body, html {
             image-rendering: pixelated;
             pointer-events: none;
         }
-
-        
     </style>
 </head>
 
 <body>
+
     <div id="crosshair"></div>
 
-    <div id="info" style="position: absolute; top: 10px; left: 10px; color: white; font-family: MinecraftMain; background: rgba(0,0,0,0.5); padding: 5px;">
+    <div id="info" style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px;">
         Facing: <span id="dirfacing">N</span><br>
         XYZ: <span id="coords">0 / 0 / 0</span><br>
         Speed: <span id="speed">0.00</span> bps
@@ -50,25 +53,43 @@ body, html {
 
     <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
 
-    <!-- 1. WORLD DATA / GEN -->
+    <!-- =========================
+         1. WORLD / GENERATION
+    ========================== -->
     <script src="worldgen.js"></script>
     <script src="biomes.js"></script>
     <script src="block.js"></script>
 
-    <!-- 2. CORE WORLD / RENDER -->
-<!-- 2. CORE WORLD / RENDER -->
-<script src="world.js"></script>
-<script src="playermodel.js"></script>
+    <!-- =========================
+         2. WORLD RENDER CORE
+    ========================== -->
+    <script src="world.js"></script>
 
-    <!-- 3. ENTITIES / PHYSICS -->
+    <!-- Player MODEL (visual only entity attachment) -->
+    <script src="playermodel.js"></script>
+
+    <!-- =========================
+         3. ENTITY SYSTEM (NEW ARCH)
+    ========================== -->
     <script src="entity.js"></script>
-    <script src="physics.js"></script>
-    <script src="player.js"></script>
 
-    <!-- 4. GAME LOOP -->
+    <!-- Physics applies to EntityLiving / EntityPlayer -->
+    <script src="physics.js"></script>
+
+    <!-- Control layer (INPUT + CAMERA + ACTIONS) -->
+    <script src="controlplayer.js"></script>
+
+    <!-- Entity player (STATE ONLY) -->
+    <script src="entityplayer.js"></script>
+
+    <!-- =========================
+         4. GAME LOOP
+    ========================== -->
     <script src="tick.js"></script>
 
-    <!-- 5. UI SYSTEM (NEW) -->
+    <!-- =========================
+         5. UI SYSTEM
+    ========================== -->
     <script src="button.js"></script>
     <script src="game_menu.js"></script>
     <script src="options_menu.js"></script>

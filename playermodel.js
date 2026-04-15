@@ -48,7 +48,7 @@ class PlayerModel {
         this.root.add(this.torso, this.head, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg);
         
         // Setting the root position to your requested spawn point
-        this.root.position.set(8, 100, 8); 
+        this.root.position.set(8, 5, 8); 
         
         this.scene.add(this.root);
     }
