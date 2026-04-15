@@ -28,8 +28,7 @@ class EntityPlayer extends EntityLiving {
         this.position.set(8, 100, 8);
         this.prevPosition.copy(this.position);
 
-        // this.playerModel.root.position.copy(this.position);
-        // window.scene.add(this.playerModel.root);
+        window.scene.add(this.playerModel.root);
 
         // === SELECTION BOX (moved from Player.js but SAME LOGIC) ===
         if (!window.selectionBox) {
@@ -201,11 +200,17 @@ class EntityPlayer extends EntityLiving {
             window.camera.rotation.set(this.pitch, this.yaw + this.headYaw, 0);
         } else {
             this.playerModel.root.visible = true;
-            const dir = new THREE.Vector3(0, 0, this.perspective === 'thirdPersonBack' ? -1 : 1);
-            dir.applyAxisAngle(new THREE.Vector3(0, 1, 0), this.yaw);
-            dir.multiplyScalar(4);
-            window.camera.position.copy(headPos).add(dir);
-            window.camera.lookAt(headPos);
+            const distance = 4;
+            const camYaw = this.yaw + this.headYaw;
+            let offset;
+            if (this.perspective === 'thirdPersonBack') {
+                offset = new THREE.Vector3(0, 0, distance).applyAxisAngle(new THREE.Vector3(0, 1, 0), camYaw);
+                window.camera.rotation.set(this.pitch, camYaw, 0);
+            } else { // thirdPersonFront
+                offset = new THREE.Vector3(0, 0, -distance).applyAxisAngle(new THREE.Vector3(0, 1, 0), camYaw);
+                window.camera.rotation.set(this.pitch, camYaw + Math.PI, 0);
+            }
+            window.camera.position.copy(headPos).add(offset);
         }
 
         const hit = this.getTargetBlock();
@@ -255,8 +260,7 @@ class EntityPlayer extends EntityLiving {
 
         super.tick(world);
 
-        // model sync
-        // this.playerModel.root.position.copy(this.position);
+        // model sync is in renderUpdate
 
         if (this.position.y < -64) this.respawn();
     }

@@ -29,6 +29,16 @@ class ControlPlayer {
                     this.entity.sprinting = true;
                 }
             }
+
+            if (e.code === 'KeyV') {
+                if (this.entity.perspective === 'firstPerson') {
+                    this.entity.perspective = 'thirdPersonBack';
+                } else if (this.entity.perspective === 'thirdPersonBack') {
+                    this.entity.perspective = 'thirdPersonFront';
+                } else {
+                    this.entity.perspective = 'firstPerson';
+                }
+            }
         });
 
         document.addEventListener('keyup', (e) => {
@@ -71,7 +81,17 @@ class ControlPlayer {
             const menuOpen = window.gameMenu && window.gameMenu.inMenu;
 
             if (isLocked && !menuOpen) {
-                this.entity.yaw -= e.movementX * 0.002;
+                const maxHeadYaw = 35 * Math.PI / 180;
+                this.entity.headYaw -= e.movementX * 0.002;
+
+                if (this.entity.headYaw > maxHeadYaw) {
+                    this.entity.yaw += this.entity.headYaw - maxHeadYaw;
+                    this.entity.headYaw = maxHeadYaw;
+                } else if (this.entity.headYaw < -maxHeadYaw) {
+                    this.entity.yaw += this.entity.headYaw + maxHeadYaw;
+                    this.entity.headYaw = -maxHeadYaw;
+                }
+
                 this.entity.pitch -= e.movementY * 0.002;
 
                 this.entity.pitch = Math.max(
@@ -79,7 +99,7 @@ class ControlPlayer {
                     Math.min(Math.PI / 2 - 0.01, this.entity.pitch)
                 );
 
-                window.camera.rotation.set(this.entity.pitch, this.entity.yaw, 0);
+                window.camera.rotation.set(this.entity.pitch, this.entity.yaw + this.entity.headYaw, 0);
             }
         });
 
