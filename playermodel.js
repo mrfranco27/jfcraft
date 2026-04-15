@@ -48,7 +48,7 @@ class PlayerModel {
         this.root.add(this.torso, this.head, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg);
         
         // Setting the root position to your requested spawn point
-        this.root.position.set(8, 5, 8); 
+        this.root.position.set(8, 30, 8); 
         
         this.scene.add(this.root);
     }
@@ -57,6 +57,11 @@ class PlayerModel {
         const geo = new THREE.BoxGeometry(w, h, d);
         const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.7 });
         return new THREE.Mesh(geo, mat);
+    }
+
+    setHeadRotation(yaw, pitch) {
+        this.head.rotation.y = yaw;
+        this.head.rotation.x = pitch;
     }
 }
 

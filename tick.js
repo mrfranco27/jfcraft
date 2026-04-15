@@ -41,15 +41,11 @@ function updateUI() {
 // --------------------------------------------------
 setInterval(() => {
 
-    // 1. INPUT + ACTIONS FIRST
-    if (window.playerController) {
-        window.playerController.tick(window.worldInstance);
+    if (window.playerEntity) {
+        window.playerEntity.tick(); // physics FIRST
     }
 
-    // 2. PHYSICS + STATE UPDATE
-    if (window.playerEntity) {
-        window.playerEntity.tick();
-    }
+    // input is handled in events
 
     lastTickTime = performance.now();
 
@@ -68,12 +64,7 @@ function animate() {
     let partialTick = (now - lastTickTime) / TICK_RATE;
     partialTick = Math.min(partialTick, 1.0);
 
-    // --------------------------------------------------
-    // CAMERA + VIEW (CONTROLLED BY CONTROLLER)
-    // --------------------------------------------------
-    if (window.playerController) {
-        window.playerController.renderUpdate?.(partialTick);
-    }
+    window.playerEntity.renderUpdate(partialTick);
 
     // --------------------------------------------------
     // SKYBOX SYNC
@@ -112,3 +103,7 @@ function animate() {
 }
 
 animate();
+
+// Initialize game
+window.playerEntity = new EntityPlayer();
+window.playerController = new ControlPlayer(window.playerEntity);

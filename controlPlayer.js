@@ -14,97 +14,85 @@ class ControlPlayer {
     initInput() {
 
         document.addEventListener('keydown', (e) => {
-            this.keys[e.code] = true;
-        });
+            if (window.gameMenu && window.gameMenu.inMenu) return;
 
-        document.addEventListener('keyup', (e) => {
-            this.keys[e.code] = false;
+            this.entity.keys[e.code] = true;
 
-            if (e.code === 'KeyW') {
-                this.entity.sprinting = false;
+            if (e.code === 'KeyR') {
+                const onlyW =
+                    this.entity.keys['KeyW'] &&
+                    !this.entity.keys['KeyA'] &&
+                    !this.entity.keys['KeyS'] &&
+                    !this.entity.keys['KeyD'];
+
+                if (onlyW && !this.entity.keys['ShiftLeft']) {
+                    this.entity.sprinting = true;
+                }
             }
         });
 
+        document.addEventListener('keyup', (e) => {
+            this.entity.keys[e.code] = false;
+            if (e.code === 'KeyW') this.entity.sprinting = false;
+        });
+
         document.addEventListener('mousedown', (e) => {
-            if (e.button === 0) this.leftClicking = true;
-            if (e.button === 2) this.rightClicking = true;
+            if (window.gameMenu && window.gameMenu.inMenu) return;
+
+            const isLocked = document.pointerLockElement === window.canvas;
+            if (!isLocked) return;
+
+            if (e.button === 0) {
+                this.entity.leftClicking = true;
+
+                if (this.entity.breakCooldown <= 0) {
+                    this.entity.performAction(true);
+                    this.entity.breakCooldown = 6;
+                }
+            }
+
+            if (e.button === 2) {
+                this.entity.rightClicking = true;
+
+                if (this.entity.placeCooldown <= 0) {
+                    this.entity.performAction(false);
+                    this.entity.placeCooldown = 4;
+                }
+            }
         });
 
         document.addEventListener('mouseup', (e) => {
-            if (e.button === 0) this.leftClicking = false;
-            if (e.button === 2) this.rightClicking = false;
+            if (e.button === 0) this.entity.leftClicking = false;
+            if (e.button === 2) this.entity.rightClicking = false;
         });
 
         document.addEventListener('mousemove', (e) => {
-            if (document.pointerLockElement !== window.canvas) return;
+            const isLocked = document.pointerLockElement === window.canvas;
+            const menuOpen = window.gameMenu && window.gameMenu.inMenu;
 
-            const p = this.entity;
+            if (isLocked && !menuOpen) {
+                this.entity.yaw -= e.movementX * 0.002;
+                this.entity.pitch -= e.movementY * 0.002;
 
-            p.yaw -= e.movementX * 0.002;
-            p.pitch -= e.movementY * 0.002;
+                this.entity.pitch = Math.max(
+                    -Math.PI / 2 + 0.01,
+                    Math.min(Math.PI / 2 - 0.01, this.entity.pitch)
+                );
 
-            p.pitch = Math.max(
-                -Math.PI / 2 + 0.01,
-                Math.min(Math.PI / 2 - 0.01, p.pitch)
-            );
-
-            this.camera.rotation.set(p.pitch, p.yaw, 0);
+                window.camera.rotation.set(this.entity.pitch, this.entity.yaw, 0);
+            }
         });
 
         window.addEventListener('contextmenu', (e) => e.preventDefault());
-    }
 
-    tick(world) {
-        const e = this.entity;
+        window.addEventListener('resize', () => {
+            const a = window.innerWidth / window.innerHeight;
 
-        // INPUT
-        const W = this.keys['KeyW'];
-        const A = this.keys['KeyA'];
-        const S = this.keys['KeyS'];
-        const D = this.keys['KeyD'];
-        const Shift = this.keys['ShiftLeft'];
-        const R = this.keys['KeyR'];
+            window.uiCam.aspect = a;
+            window.uiCam.updateProjectionMatrix();
 
-        e.crouching = Shift;
-
-        if (!W || S || Shift) e.sprinting = false;
-
-        const onlyW = W && !A && !S && !D && !Shift;
-
-        if (R && onlyW) e.sprinting = true;
-
-        // MOVEMENT (same logic as your Physics.js expects)
-        let inputX = (D ? 1 : 0) - (A ? 1 : 0);
-        let inputZ = (S ? 1 : 0) - (W ? 1 : 0);
-
-        const moveVec = new THREE.Vector3(inputX, 0, inputZ).normalize();
-        moveVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), e.yaw);
-
-        e.velocity.x += moveVec.x * 0.1;
-        e.velocity.z += moveVec.z * 0.1;
-
-        // JUMP
-        if (this.keys['Space'] && e.onGround) {
-            e.velocity.y = window.Physics.JUMP_FORCE;
-            e.onGround = false;
-        }
-
-        // CAMERA FOLLOW (IDENTICAL to your old renderUpdate)
-        this.camera.position.copy(e.position);
-        this.camera.position.y += e.crouching ? 1.54 : 1.62;
-
-        // BLOCK ACTIONS
-        if (this.leftClicking && e.breakCooldown <= 0) {
-            this.perform(true);
-            e.breakCooldown = 6;
-        }
-
-        if (this.rightClicking && e.placeCooldown <= 0) {
-            this.perform(false);
-            e.placeCooldown = 4;
-        }
-
-        window.Physics.apply(e);
+            this.entity.handPivot.position.x = a - 0.45;
+        });
     }
 
     perform(isBreaking) {
