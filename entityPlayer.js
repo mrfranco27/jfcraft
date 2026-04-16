@@ -158,8 +158,8 @@ class EntityPlayer extends EntityLiving {
         const key = `${bx},${by},${bz}`;
 
         if (isBreaking) {
-            if (!window.WorldData[key]) return;
-            delete window.WorldData[key];
+            window.breakBlock(bx, by, bz, true); // True means "Play Sound"
+            return; // Stop here, breakBlock handled the visuals
         } else {
             const hw = 0.3;
 
@@ -175,25 +175,16 @@ class EntityPlayer extends EntityLiving {
             };
         }
 
+        // Placement still needs to manually trigger the mesh update 
+        // until you make a window.placeBlock() helper!
         const cx = Math.floor(bx / 16);
         const cz = Math.floor(bz / 16);
-
         const newChunk = Block.generateChunkMesh(cx, cz, window.WorldData);
-
-        const oldChunk = window.scene.children.find(c =>
-            c.userData && c.userData.cx === cx && c.userData.cz === cz && c !== newChunk
-        );
-
+        const oldChunk = window.scene.children.find(c => c.userData && c.userData.cx === cx && c.userData.cz === cz && c !== newChunk);
         window.scene.add(newChunk);
-
         if (oldChunk) {
             window.scene.remove(oldChunk);
-
             if (oldChunk.geometry) oldChunk.geometry.dispose();
-
-            oldChunk.traverse(child => {
-                if (child.geometry) child.geometry.dispose();
-            });
         }
     }
 

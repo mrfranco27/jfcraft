@@ -136,3 +136,36 @@ window.addEventListener("click", () => {
     if (document.pointerLockElement === canvas) return;
     canvas.requestPointerLock();
 }, { once: true });
+
+window.breakBlock = function(bx, by, bz, playSound = true) {
+    const key = `${bx},${by},${bz}`;
+    const block = window.WorldData[key];
+    if (!block) return;
+
+    // 1. Play Sound (Sound logic for 1.12.2)
+    if (playSound) {
+        // You would call your sound engine here:
+        // audioManager.play(block.type.toLowerCase() + "_break");
+        console.log(`Sound: ${block.type} broke.`);
+    }
+
+    // 2. Remove Data
+    delete window.WorldData[key];
+
+    // 3. Rebuild Visuals
+    const cx = Math.floor(bx / 16);
+    const cz = Math.floor(bz / 16);
+    
+    // Use your existing Block mesh generator
+    const newChunk = Block.generateChunkMesh(cx, cz); 
+    
+    const oldChunk = window.scene.children.find(c => 
+        c.userData && c.userData.cx === cx && c.userData.cz === cz && c !== newChunk
+    );
+
+    window.scene.add(newChunk);
+    if (oldChunk) {
+        window.scene.remove(oldChunk);
+        if (oldChunk.geometry) oldChunk.geometry.dispose();
+    }
+};

@@ -113,37 +113,6 @@ class ControlPlayer {
         });
     }
 
-    perform(isBreaking) {
-        const ray = new THREE.Raycaster();
-        ray.far = 6;
-
-        ray.setFromCamera(new THREE.Vector2(0, 0), window.camera);
-
-        const hits = ray.intersectObjects(window.scene.children, true);
-        if (!hits.length) return;
-
-        const hit = hits[0];
-
-        const off = isBreaking ? -0.5 : 0.5;
-
-        const bx = Math.floor(hit.point.x + hit.face.normal.x * off);
-        const by = Math.floor(hit.point.y + hit.face.normal.y * off);
-        const bz = Math.floor(hit.point.z + hit.face.normal.z * off);
-
-        const key = `${bx},${by},${bz}`;
-
-        if (isBreaking) {
-            delete window.WorldData[key];
-        } else {
-            window.WorldData[key] = { type: "GRASS" };
-        }
-
-        const cx = Math.floor(bx / 16);
-        const cz = Math.floor(bz / 16);
-
-        const mesh = Block.generateChunkMesh(cx, cz);
-        window.scene.add(mesh);
-    }
 }
 
 window.ControlPlayer = ControlPlayer;
