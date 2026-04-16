@@ -1,17 +1,15 @@
 class EntityPlayer extends EntityLiving {
     constructor() {
-        super();
+        super(); // ALWAYS FIRST
 
+        // 1. Core Properties
         this.prevPosition = this.position.clone();
-
         this.sprinting = false;
         this.crouching = false;
-
         this.leftClicking = false;
         this.rightClicking = false;
         this.breakCooldown = 0;
         this.placeCooldown = 0;
-
         this.yaw = Math.PI;
         this.pitch = 0;
         this.headYaw = 0;
@@ -21,13 +19,10 @@ class EntityPlayer extends EntityLiving {
         window.camera.rotation.order = 'YXZ';
         window.camera.rotation.set(this.pitch, this.yaw, 0);
 
-        // === YOUR MODEL (UNCHANGED) ===
+        // 2. Models & Scene
         this.playerModel = new PlayerModel();
-
-        // spawn like your original
-        this.position.set(8, 100, 8);
+        this.position.set(8, 30, 8);
         this.prevPosition.copy(this.position);
-
         window.scene.add(this.playerModel.root);
 
         // === SELECTION BOX (moved from Player.js but SAME LOGIC) ===
@@ -41,36 +36,47 @@ class EntityPlayer extends EntityLiving {
             window.scene.add(window.selectionBox);
         }
 
-        // === HAND UI (UNCHANGED LOGIC) ===
+         // 3. UI Scene & Camera
         window.uiScene = new THREE.Scene();
-
         const aspect = window.innerWidth / window.innerHeight;
-        window.uiCam = new THREE.PerspectiveCamera(90, aspect, 0.01, 10);
+        window.uiCam = new THREE.PerspectiveCamera(window.camera.fov, aspect, 0.01, 10);
+        window.uiCam.position.set(0, 0, 5);
 
-        const p = 0.0625;
-        const armGeo = new THREE.BoxGeometry(4 * p, 12 * p, 4 * p);
-        const baseColor = new THREE.Color(0x5D4037);
+        // Lights
+        window.uiScene.add(new THREE.AmbientLight(0xffffff, 0.6));
+        const uiLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        uiLight.position.set(5, 10, 7.5);
+        window.uiScene.add(uiLight);
 
-        const shades = [0.8, 0.8, 1.0, 0.5, 0.6, 0.6];
-        const armMaterials = shades.map(s =>
-            new THREE.MeshBasicMaterial({
-                color: baseColor.clone().multiplyScalar(s),
-                depthTest: false
-            })
-        );
+        const uiBackLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        uiBackLight.position.set(-5, 10, -7.5);
+        window.uiScene.add(uiBackLight);
 
-        const armMesh = new THREE.Mesh(armGeo, armMaterials);
+
+        const P = 1/16;
+        const armMesh = this.playerModel.rightArm.clone();
+        armMesh.position.set(0, 0, 0);
+        armMesh.rotation.x = Math.PI / 2; // Lay flat
+        armMesh.position.z = 6 * P;
+
+        const armOffset = new THREE.Group();
+        armOffset.add(armMesh);
 
         this.handPivot = new THREE.Group();
-        this.handPivot.add(armMesh);
-
-        this.handPivot.position.set(0.57, -0.6, -0.5);
-
-        const d2r = Math.PI / 180;
-        this.handPivot.rotation.order = 'ZXY';
-        this.handPivot.rotation.set(-45 * d2r, -20 * d2r, -45 * d2r);
-
+        this.handPivot.add(armOffset);
+        this.handPivot.position.set(0.5, -0.5, 4.4);
         window.uiScene.add(this.handPivot);
+
+        // 5. ROTATION ENGINE VARS
+        const d2r = Math.PI / 180;
+        this.handPitch = 30 * d2r;
+        this.handRoll = 60 * d2r;
+        this.handYaw = -33 * d2r;
+        
+        // Static axes for world rotation
+        this.axisY = new THREE.Vector3(0, 1, 0);
+        this.axisX = new THREE.Vector3(1, 0, 0);
+        this.axisZ = new THREE.Vector3(0, 0, 1);
 
         this.spawn();
     }
@@ -119,6 +125,20 @@ class EntityPlayer extends EntityLiving {
 
         for (const hit of hits) {
             if (hit.object.type === "LineSegments") continue;
+            
+            // Skip the player model
+            let parent = hit.object;
+            let isPlayerModel = false;
+            while (parent) {
+                if (parent === this.playerModel.root) {
+                    isPlayerModel = true;
+                    break;
+                }
+                parent = parent.parent;
+            }
+            
+            if (isPlayerModel) continue;
+            
             return hit;
         }
 
@@ -193,24 +213,25 @@ class EntityPlayer extends EntityLiving {
         this.playerModel.root.rotation.y = this.yaw;
         this.playerModel.setHeadRotation(this.headYaw, this.pitch);
 
+        // === SMOOTH CAMERA POSITIONING (FPS-BASED) ===
+        const totalYaw = this.yaw + this.headYaw;
+        const pitch = this.pitch;
+
         if (this.perspective === 'firstPerson') {
             this.playerModel.root.visible = false;
-            window.camera.position.copy(lerp);
-            window.camera.position.y += eyeHeight;
-            window.camera.rotation.set(this.pitch, this.yaw + this.headYaw, 0);
+            window.camera.position.copy(headPos);
+            window.camera.rotation.set(this.pitch, totalYaw, 0, 'YXZ');
         } else {
             this.playerModel.root.visible = true;
-            const distance = 4;
-            const camYaw = this.yaw + this.headYaw;
-            let offset;
-            if (this.perspective === 'thirdPersonBack') {
-                offset = new THREE.Vector3(0, 0, distance).applyAxisAngle(new THREE.Vector3(0, 1, 0), camYaw);
-                window.camera.rotation.set(this.pitch, camYaw, 0);
-            } else { // thirdPersonFront
-                offset = new THREE.Vector3(0, 0, -distance).applyAxisAngle(new THREE.Vector3(0, 1, 0), camYaw);
-                window.camera.rotation.set(this.pitch, camYaw + Math.PI, 0);
-            }
-            window.camera.position.copy(headPos).add(offset);
+            const distance = (this.perspective === 'thirdPersonBack') ? 4 : -4;
+            
+            // Spherical math for smooth orbital camera
+            const x = distance * Math.sin(totalYaw) * Math.cos(pitch);
+            const y = -distance * Math.sin(pitch);
+            const z = distance * Math.cos(totalYaw) * Math.cos(pitch);
+
+            window.camera.position.set(headPos.x + x, headPos.y + y, headPos.z + z);
+            window.camera.lookAt(headPos);
         }
 
         const hit = this.getTargetBlock();
@@ -225,9 +246,34 @@ class EntityPlayer extends EntityLiving {
         } else if (window.selectionBox) {
             window.selectionBox.visible = false;
         }
+
+        // === 1:1 MINECRAFT ARM ROTATION (WORLD-SPACE ONLY) ===
+if (this.handPivot) {
+    // 1. Force the pivot back to a neutral world state every frame
+    this.handPivot.quaternion.set(0, 0, 0, 1);
+
+    // 2. Create a rotation based strictly on your variables
+    // Minecraft uses YXZ order for head/hand logic (Yaw first, then Pitch, then Roll)
+    const worldRotation = new THREE.Euler(
+        this.handPitch, 
+        this.handYaw, 
+        this.handRoll, 
+        'YXZ'
+    );
+
+    // 3. Apply the absolute rotation directly
+    this.handPivot.quaternion.setFromEuler(worldRotation);
+    
+    // 4. Ensure the pivot stays at a fixed "Global" screen position 
+    // This prevents any "bobbing" from affecting the rotation math
+    this.handPivot.position.set(0.7, -0.35, 4.27); 
+}
+
     }
 
     tick(world) {
+
+        
         this.prevPosition.copy(this.position);
 
         if (this.leftClicking && this.breakCooldown <= 0) {
@@ -247,16 +293,29 @@ class EntityPlayer extends EntityLiving {
         const S = this.keys['KeyS'];
         const Shift = this.keys['ShiftLeft'];
         const R = this.keys['KeyR'];
+        const A = this.keys['KeyA'];
+        const D = this.keys['KeyD'];
 
         if (!W || S || Shift) this.sprinting = false;
 
-        const onlyW = W && !S && !Shift && !this.keys['KeyA'] && !this.keys['KeyD'];
+        const onlyW = W && !S && !Shift && !A && !D;
 
         this.crouching = Shift;
 
         if (R && onlyW) {
             this.sprinting = true;
         }
+
+        // === BODY ROTATION LOGIC ===
+        // Check if player is moving (any WASD input)
+        const isMoving = W || S || A || D;
+        
+        if (isMoving) {
+            // While moving, snap body to face where head is facing
+            this.yaw += this.headYaw;
+            this.headYaw = 0;
+        }
+        // If not moving, body stays at current yaw
 
         super.tick(world);
 

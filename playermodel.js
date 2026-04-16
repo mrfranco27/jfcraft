@@ -1,62 +1,66 @@
 const P = 0.058; // 1.8.8 Player Pixel Scale (1.8m / 32px)
+const loader = new THREE.TextureLoader();
+
+// Load the skin (using a default template as a placeholder)
+const skinTexture = loader.load('https://t.novaskin.me/d313b808f212be17ede137490a0845ee113218f44219a775b42df58418c8042a');
+skinTexture.magFilter = THREE.NearestFilter;
+skinTexture.minFilter = THREE.NearestFilter;
+
+// MC 1.12.2 Base Layer UVs [Right, Left, Top, Bottom, Front, Back]
+const SKIN_UVS = {
+    head: [[0, 0.75, 0.125, 0.875], [0.25, 0.75, 0.375, 0.875], [0.125, 0.875, 0.25, 1], [0.25, 0.875, 0.375, 1], [0.375, 0.75, 0.5, 0.875], [0.125, 0.75, 0.25, 0.875]],
+    torso: [[0.4375, 0.5, 0.5, 0.6875], [0.25, 0.5, 0.3125, 0.6875], [0.3125, 0.6875, 0.4375, 0.75], [0.4375, 0.6875, 0.5625, 0.75], [0.5, 0.5, 0.625, 0.6875], [0.3125, 0.5, 0.4375, 0.6875]],
+    rightArm: [[0.625, 0.5, 0.6875, 0.6875], [0.75, 0.5, 0.8125, 0.6875], [0.6875, 0.6875, 0.75, 0.75], [0.75, 0.6875, 0.8125, 0.75], [0.8125, 0.5, 0.875, 0.6875], [0.6875, 0.5, 0.75, 0.6875]],
+    leftArm: [[0.625, 0, 0.6875, 0.1875], [0.5, 0, 0.5625, 0.1875], [0.5625, 0.1875, 0.625, 0.25], [0.625, 0.1875, 0.6875, 0.25], [0.6875, 0, 0.75, 0.1875], [0.5625, 0, 0.625, 0.1875]],
+    rightLeg: [[0.125, 0.5, 0.1875, 0.6875], [0, 0.5, 0.0625, 0.6875], [0.0625, 0.6875, 0.125, 0.75], [0.125, 0.6875, 0.1875, 0.75], [0.1875, 0.5, 0.25, 0.6875], [0.0625, 0.5, 0.125, 0.6875]],
+    leftLeg: [[0.375, 0, 0.4375, 0.1875], [0.25, 0, 0.3125, 0.1875], [0.3125, 0.1875, 0.375, 0.25], [0.375, 0.1875, 0.4375, 0.25], [0.4375, 0, 0.5, 0.1875], [0.3125, 0, 0.375, 0.1875]]
+};
 
 class PlayerModel {
     constructor() {
         this.scene = window.scene;
         this.root = new THREE.Group();
 
-        // ====================================================
         // 1. LEGS (4x12x4 pixels)
-        // ====================================================
-        this.rightLeg = this.createPart(4*P, 12*P, 4*P, 0x3366ff);
-        this.leftLeg = this.createPart(4*P, 12*P, 4*P, 0x5588ff);
-        
-        // Y center = 6px
-        this.rightLeg.position.set(-2*P, 6*P, 0); 
+        this.rightLeg = this.createPart(4*P, 12*P, 4*P, SKIN_UVS.rightLeg);
+        this.leftLeg = this.createPart(4*P, 12*P, 4*P, SKIN_UVS.leftLeg);
+        this.rightLeg.position.set(-2*P, 6*P, 0);
         this.leftLeg.position.set(2*P, 6*P, 0);
 
-        // ====================================================
         // 2. TORSO (8x12x4 pixels)
-        // ====================================================
-        // Starts at 12px, Y center = 18px
-        this.torso = this.createPart(8*P, 12*P, 4*P, 0xff3366);
+        this.torso = this.createPart(8*P, 12*P, 4*P, SKIN_UVS.torso);
         this.torso.position.set(0, 18*P, 0);
 
-        // ====================================================
         // 3. ARMS (4x12x4 pixels)
-        // ====================================================
-        // Aligned 1:1 with Torso Y (18px)
-        const shoulderY = 18 * P; 
-        const armOffsetX = 6 * P; 
-
-        this.rightArm = this.createPart(4*P, 12*P, 4*P, 0x33ff66);
-        this.leftArm = this.createPart(4*P, 12*P, 4*P, 0x66ff99);
-
+        const shoulderY = 18 * P;
+        const armOffsetX = 6 * P;
+        this.rightArm = this.createPart(4*P, 12*P, 4*P, SKIN_UVS.rightArm);
+        this.leftArm = this.createPart(4*P, 12*P, 4*P, SKIN_UVS.leftArm);
         this.rightArm.position.set(-armOffsetX, shoulderY, 0);
         this.leftArm.position.set(armOffsetX, shoulderY, 0);
 
-        // ====================================================
         // 4. HEAD (8x8x8 pixels)
-        // ====================================================
-        // Starts at 24px, Y center = 28px
-        this.head = this.createPart(8*P, 8*P, 8*P, 0xffcc33);
+        this.head = this.createPart(8*P, 8*P, 8*P, SKIN_UVS.head);
         this.head.position.set(0, 28*P, 0);
 
-        // ====================================================
-        // BUILD & SPAWN AT 8, 60, 8
-        // ====================================================
+        // ASSEMBLY
         this.root.add(this.torso, this.head, this.rightArm, this.leftArm, this.rightLeg, this.leftLeg);
-        
-        // Setting the root position to your requested spawn point
-        // this.root.position.set(8, 30, 8); 
-        
-        // this.scene.add(this.root);
+        this.scene.add(this.root);
     }
 
-    createPart(w, h, d, color) {
+    createPart(w, h, d, uvs) {
         const geo = new THREE.BoxGeometry(w, h, d);
-        const mat = new THREE.MeshStandardMaterial({ color: color, roughness: 0.7 });
-        return new THREE.Mesh(geo, mat);
+        
+        // Minecraft face order: Right, Left, Top, Bottom, Front, Back
+        const materials = uvs.map(uv => {
+            const faceTex = skinTexture.clone();
+            faceTex.offset.set(uv[0], uv[1]);
+            faceTex.repeat.set(uv[2] - uv[0], uv[3] - uv[1]);
+            faceTex.needsUpdate = true;
+            return new THREE.MeshStandardMaterial({ map: faceTex, transparent: true, alphaTest: 0.5 });
+        });
+
+        return new THREE.Mesh(geo, materials);
     }
 
     setHeadRotation(yaw, pitch) {
@@ -65,10 +69,17 @@ class PlayerModel {
     }
 }
 
-// Ensure scene has lights to see the colors
-const light = new THREE.DirectionalLight(0xffffff, 1);
+// Lighting Setup
+const light = new THREE.DirectionalLight(0xffffff, 0.8);
 light.position.set(5, 10, 7.5);
-window.scene.add(light, new THREE.AmbientLight(0x404040));
+window.scene.add(light);
 
-// Instantiate the model
+const backLight = new THREE.DirectionalLight(0xffffff, 0.6);
+backLight.position.set(-5, 10, -7.5);
+window.scene.add(backLight);
+
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+window.scene.add(ambientLight);
+
 const player = new PlayerModel();
+player.root.position.set(8, 30, 8);

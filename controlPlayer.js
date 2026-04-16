@@ -98,8 +98,6 @@ class ControlPlayer {
                     -Math.PI / 2 + 0.01,
                     Math.min(Math.PI / 2 - 0.01, this.entity.pitch)
                 );
-
-                window.camera.rotation.set(this.entity.pitch, this.entity.yaw + this.entity.headYaw, 0);
             }
         });
 

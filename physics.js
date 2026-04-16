@@ -20,6 +20,7 @@ window.Physics = {
         let inputX = (p.keys['KeyD'] ? 1 : 0) - (p.keys['KeyA'] ? 1 : 0);
         let inputZ = (p.keys['KeyS'] ? 1 : 0) - (p.keys['KeyW'] ? 1 : 0);
         const moveVec = new THREE.Vector3(inputX, 0, inputZ).normalize();
+        // Move in the direction body is facing (only body yaw, not head)
         moveVec.applyAxisAngle(new THREE.Vector3(0, 1, 0), p.yaw);
 
         // JUMPING (Cannot jump as high/effectively if crouching in some versions, but standard here)
