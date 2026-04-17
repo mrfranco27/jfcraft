@@ -42,15 +42,7 @@ class EntityPlayer extends EntityLiving {
         window.uiCam = new THREE.PerspectiveCamera(window.camera.fov, aspect, 0.01, 10);
         window.uiCam.position.set(0, 0, 5);
 
-        // Lights
-        window.uiScene.add(new THREE.AmbientLight(0xffffff, 0.6));
-        const uiLight = new THREE.DirectionalLight(0xffffff, 0.8);
-        uiLight.position.set(5, 10, 7.5);
-        window.uiScene.add(uiLight);
-
-        const uiBackLight = new THREE.DirectionalLight(0xffffff, 0.6);
-        uiBackLight.position.set(-5, 10, -7.5);
-        window.uiScene.add(uiBackLight);
+        window.setupGlobalLighting(window.uiScene);
 
 
         const P = 1/16;

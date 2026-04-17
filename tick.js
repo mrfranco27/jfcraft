@@ -50,7 +50,9 @@ setInterval(() => {
 // --------------------------------------------------
 function animate() {
     requestAnimationFrame(animate);
-    
+
+
+
     const player = window.playerEntity;
     if (!player || !window.renderer) return;
 
@@ -87,6 +89,21 @@ function animate() {
     );
     window.camera.updateProjectionMatrix();
 
+if (window.camera && window.uiFrontLight && window.uiBackLight) {
+        // 1. Get the rotation of the player
+        const playerRotation = window.camera.quaternion;
+
+        // 2. Rotate the Front Light position
+        window.uiFrontLight.position
+            .copy(window.uiFrontBasePos)
+            .applyQuaternion(playerRotation.clone().invert());
+
+        // 3. Rotate the Back Light position
+        window.uiBackLight.position
+            .copy(window.uiBackBasePos)
+            .applyQuaternion(playerRotation.clone().invert());
+    }
+
     // --------------------------------------------------
     // RENDER PASS
     // --------------------------------------------------
@@ -97,6 +114,7 @@ function animate() {
 
     if (window.uiScene && window.uiCam) {
         window.renderer.render(window.uiScene, window.uiCam);
+        
     }
 
     updateUI();

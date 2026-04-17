@@ -70,16 +70,32 @@ class PlayerModel {
 }
 
 // Lighting Setup
-const light = new THREE.DirectionalLight(0xffffff, 0.8);
-light.position.set(5, 10, 7.5);
-window.scene.add(light);
+window.setupGlobalLighting = function(targetScene) {
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    targetScene.add(ambient);
 
-const backLight = new THREE.DirectionalLight(0xffffff, 0.6);
-backLight.position.set(-5, 10, -7.5);
-window.scene.add(backLight);
+    // Create the front and back lights
+    const front = new THREE.DirectionalLight(0xffffff, 0.8);
+    const back = new THREE.DirectionalLight(0xffffff, 0.6);
+    
+    targetScene.add(front);
+    targetScene.add(back);
 
-const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-window.scene.add(ambientLight);
+    // Save them to a global object if this is the uiScene
+    if (targetScene === window.uiScene) {
+        window.uiFrontLight = front;
+        window.uiBackLight = back;
+        // Keep their base "world" positions
+        window.uiFrontBasePos = new THREE.Vector3(5, 10, 7.5);
+        window.uiBackBasePos = new THREE.Vector3(-5, 10, -7.5);
+    } else {
+        front.position.set(5, 10, 7.5);
+        back.position.set(-5, 10, -7.5);
+    }
+};
+
+
+window.setupGlobalLighting(window.scene);
 
 const player = new PlayerModel();
 player.root.position.set(8, 30, 8);
