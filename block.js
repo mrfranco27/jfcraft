@@ -7,8 +7,8 @@ const Block = {
 
         const allPaths = [];
 
-        for (const typeKey in this.TYPES) {
-            const type = this.TYPES[typeKey];
+        for (const typeKey in window.BlockRegistry) {
+            const type = window.BlockRegistry[typeKey];
 
             for (const blockKey in type) {
                 const block = type[blockKey];
@@ -30,46 +30,6 @@ const Block = {
                 this.textures[path].magFilter = THREE.NearestFilter;
             }
         });
-    },
-
-    TYPES: {
-        AIR: {
-            AIR: {
-                textures: [null, null, null, null, null, null],
-                overlays: [null, null, null, null, null, null],
-                tint: null
-            }
-        },
-
-        SOLID: {
-            GRASS: {
-                tint: { top: true },
-                textures: [
-                    'assets/minecraft/textures/block/grass_block_side.png',
-                    'assets/minecraft/textures/block/grass_block_side.png',
-                    'assets/minecraft/textures/block/grass_block_top.png',
-                    'assets/minecraft/textures/block/dirt.png',
-                    'assets/minecraft/textures/block/grass_block_side.png',
-                    'assets/minecraft/textures/block/grass_block_side.png'
-                ],
-                overlays: [
-                    'assets/minecraft/textures/block/grass_side_overlay.png',
-                    'assets/minecraft/textures/block/grass_side_overlay.png',
-                    null,
-                    null,
-                    'assets/minecraft/textures/block/grass_side_overlay.png',
-                    'assets/minecraft/textures/block/grass_side_overlay.png'
-                ]
-            },
-
-            DIRT: {
-                tint: null,
-                textures: Array(6).fill(
-                    'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/dirt.png'
-                ),
-                overlays: Array(6).fill(null)
-            }
-        }
     },
 
     NEIGHBORS: [
@@ -114,10 +74,12 @@ const Block = {
                     const wx = cx * 16 + x;
                     const wz = cz * 16 + z;
 
-                    const block = window.WorldData[`${wx},${y},${wz}`];
-                    if (!block || block.type === "AIR") continue;
+                    const id = window.WorldData[`${wx},${y},${wz}`]?.id ?? 0;
 
-                    const def = this.TYPES.SOLID[block.type];
+                    if (id === 0) continue;
+
+                    const def = window.BlockById[id];
+
                     if (!def) continue;
 
                     this.NEIGHBORS.forEach((off, i) => {
@@ -207,16 +169,16 @@ const Block = {
         });
 
         // =========================
-// 🌤️ SIMPLE FACE SHADING
-// =========================
-let light = 1; // constant now
+        // 🌤️ SIMPLE FACE SHADING
+        // =========================
+        let light = 1; // constant now
 
-let c = (isOverlay || this.shouldTintFace(def, faceIdx))
-    ? biomeColor.clone()
-    : new THREE.Color(0xffffff);
+        let c = (isOverlay || this.shouldTintFace(def, faceIdx))
+            ? biomeColor.clone()
+            : new THREE.Color(0xffffff);
 
-// Apply fake directional shading ONLY
-c.multiplyScalar(brightnessVal * light);
+        // Apply fake directional shading ONLY
+        c.multiplyScalar(brightnessVal * light);
 
         for (let i = 0; i < 4; i++) {
             bucket.col.push(c.r, c.g, c.b);
@@ -234,3 +196,5 @@ c.multiplyScalar(brightnessVal * light);
 };
 
 Block.init();
+
+window.Block = Block;

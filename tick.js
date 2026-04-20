@@ -4,6 +4,9 @@ const TICK_RATE = 50;
 const baseFOV = 90;
 const sprintMultiplier = 1.1; // 10% increase
 
+window.npcs = [];
+window.npcs.push(new EntityNPC());
+
 // --------------------------------------------------
 // UI UPDATE (NOW USES ENTITYPLAYER ONLY)
 // --------------------------------------------------
@@ -26,7 +29,7 @@ function updateUI() {
     dirElement.innerText = directions[index] + status;
 
     const p = player.position;
-    coordsElement.innerText = `${Math.floor(p.x)} / ${Math.floor(p.y)} / ${Math.floor(p.z)}`;
+    coordsElement.innerText = `${p.x.toFixed(3)} / ${p.y.toFixed(3)} / ${p.z.toFixed(3)}`;
 
     const horizontalVelocity = Math.sqrt(
         player.velocity.x ** 2 + player.velocity.z ** 2
@@ -41,7 +44,11 @@ function updateUI() {
 setInterval(() => {
     if (window.playerEntity) {
         window.playerEntity.tick(); // physics FIRST
+
+        window.npcs.forEach(npc => npc.tick(window.world));
     }
+
+    
     lastTickTime = performance.now();
 }, TICK_RATE);
 
@@ -54,6 +61,7 @@ function animate() {
 
 
     const player = window.playerEntity;
+    
     if (!player || !window.renderer) return;
 
     const now = performance.now();
@@ -62,6 +70,7 @@ function animate() {
     let partialTick = (now - lastTickTime) / TICK_RATE;
     partialTick = Math.min(partialTick, 1.0);
     window.playerEntity.renderUpdate(partialTick);
+    window.npcs.forEach(npc => npc.renderUpdate(partialTick));
 
     // Calculate delta time for frame-rate independent FOV lerping
     const dt = (now - lastRenderTime) / 1000; 

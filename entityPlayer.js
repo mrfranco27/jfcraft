@@ -73,39 +73,7 @@ class EntityPlayer extends EntityLiving {
         this.spawn();
     }
 
-    findSafeLocation() {
-        let tx = 8, ty = 100, tz = 8;
-        let found = false;
-        let attempts = 0;
 
-        while (!found && attempts < 100) {
-            attempts++;
-
-            tx = Math.floor(Math.random() * 16);
-            tz = Math.floor(Math.random() * 16);
-
-            for (let y = 255; y >= 0; y--) {
-                const key = `${tx},${y},${tz}`;
-
-                if (
-                    window.WorldData[key] &&
-                    !window.WorldData[`${tx},${y + 1},${tz}`] &&
-                    !window.WorldData[`${tx},${y + 2},${tz}`]
-                ) {
-                    ty = y + 1;
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        this.position.set(tx, ty, tz);
-        this.prevPosition.copy(this.position);
-        this.velocity.set(0, 0, 0);
-    }
-
-    spawn() { this.findSafeLocation(); }
-    respawn() { this.findSafeLocation(); }
 
     getTargetBlock() {
         const raycaster = new THREE.Raycaster();
@@ -137,48 +105,43 @@ class EntityPlayer extends EntityLiving {
         return null;
     }
 
-    performAction(isBreaking) {
-        const hit = this.getTargetBlock();
-        if (!hit) return;
+    breakBlock() {
+    const hit = this.getTargetBlock();
+    if (!hit) return;
 
-        const offset = isBreaking ? -0.5 : 0.5;
+    const offset = -0.5;
 
-        const bx = Math.floor(hit.point.x + hit.face.normal.x * offset);
-        const by = Math.floor(hit.point.y + hit.face.normal.y * offset);
-        const bz = Math.floor(hit.point.z + hit.face.normal.z * offset);
+    const bx = Math.floor(hit.point.x + hit.face.normal.x * offset);
+    const by = Math.floor(hit.point.y + hit.face.normal.y * offset);
+    const bz = Math.floor(hit.point.z + hit.face.normal.z * offset);
 
-        const key = `${bx},${by},${bz}`;
+    window.breakBlock(bx, by, bz, true);
+}
 
-        if (isBreaking) {
-            window.breakBlock(bx, by, bz, true); // True means "Play Sound"
-            return; // Stop here, breakBlock handled the visuals
-        } else {
-            const hw = 0.3;
+placeBlock() {
+    const hit = this.getTargetBlock();
+    if (!hit) return;
 
-            if (
-                bx + 1 > this.position.x - hw && bx < this.position.x + hw &&
-                by + 1 > this.position.y && by < this.position.y + 1.8 &&
-                bz + 1 > this.position.z - hw && bz < this.position.z + hw
-            ) return;
+    const offset = 0.5;
 
-            window.WorldData[key] = {
-                type: 'GRASS',
-                skyLight: 0
-            };
-        }
+    const bx = Math.floor(hit.point.x + hit.face.normal.x * offset);
+    const by = Math.floor(hit.point.y + hit.face.normal.y * offset);
+    const bz = Math.floor(hit.point.z + hit.face.normal.z * offset);
 
-        // Placement still needs to manually trigger the mesh update 
-        // until you make a window.placeBlock() helper!
-        const cx = Math.floor(bx / 16);
-        const cz = Math.floor(bz / 16);
-        const newChunk = Block.generateChunkMesh(cx, cz, window.WorldData);
-        const oldChunk = window.scene.children.find(c => c.userData && c.userData.cx === cx && c.userData.cz === cz && c !== newChunk);
-        window.scene.add(newChunk);
-        if (oldChunk) {
-            window.scene.remove(oldChunk);
-            if (oldChunk.geometry) oldChunk.geometry.dispose();
-        }
-    }
+    const hw = 0.3;
+
+    // prevent placing inside player
+    if (
+        bx + 1 > this.position.x - hw && bx < this.position.x + hw &&
+        by + 1 > this.position.y && by < this.position.y + 1.8 &&
+        bz + 1 > this.position.z - hw && bz < this.position.z + hw
+    ) return;
+
+    // 🔥 NEW: use registry instead of string
+    const block = window.BlockRegistry.SOLID.DIRT;
+
+    window.placeBlock(bx, by, bz, block.blockID, true);
+}
 
     renderUpdate(partialTick) {
         const lerp = new THREE.Vector3().lerpVectors(
@@ -260,14 +223,14 @@ if (this.handPivot) {
         this.prevPosition.copy(this.position);
 
         if (this.leftClicking && this.breakCooldown <= 0) {
-            this.performAction(true);
-            this.breakCooldown = 6;
-        }
+    this.breakBlock();
+    this.breakCooldown = 6;
+}
 
-        if (this.rightClicking && this.placeCooldown <= 0) {
-            this.performAction(false);
-            this.placeCooldown = 4;
-        }
+if (this.rightClicking && this.placeCooldown <= 0) {
+    this.placeBlock();
+    this.placeCooldown = 4;
+}
 
         if (this.breakCooldown > 0) this.breakCooldown--;
         if (this.placeCooldown > 0) this.placeCooldown--;

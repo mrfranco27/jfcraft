@@ -70,8 +70,12 @@ class ChunkGenerator {
                     chunk.setBlock(x, y, z, blockId);
 
                     // 🔥 CONNECT TO RENDERER
+                    const block = (y === height)
+                        ? window.BlockRegistry.SOLID.GRASS
+                        : window.BlockRegistry.SOLID.DIRT;
+
                     window.WorldData[`${worldX},${y},${worldZ}`] = {
-                        type: (y === height) ? "GRASS" : "DIRT"
+                        id: block.blockID
                     };
                 }
             }

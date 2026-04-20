@@ -140,30 +140,50 @@ window.addEventListener("click", () => {
 window.breakBlock = function(bx, by, bz, playSound = true) {
     const key = `${bx},${by},${bz}`;
     const block = window.WorldData[key];
-    if (!block) return;
+    if (!block || block.id === 0) return;
 
-    // 1. Play Sound (Sound logic for 1.12.2)
-    if (playSound) {
-        // You would call your sound engine here:
-        // audioManager.play(block.type.toLowerCase() + "_break");
-        console.log(`Sound: ${block.type} broke.`);
-    }
+    if (playSound) console.log(`Sound: block ${block.id} broke.`);
 
-    // 2. Remove Data
+    // 1. Remove Data
     delete window.WorldData[key];
 
-    // 3. Rebuild Visuals
+    // 2. Rebuild Visuals
     const cx = Math.floor(bx / 16);
     const cz = Math.floor(bz / 16);
-    
-    // Use your existing Block mesh generator
-    const newChunk = Block.generateChunkMesh(cx, cz); 
-    
+    const newChunk = Block.generateChunkMesh(cx, cz);
     const oldChunk = window.scene.children.find(c => 
         c.userData && c.userData.cx === cx && c.userData.cz === cz && c !== newChunk
     );
 
     window.scene.add(newChunk);
+    if (oldChunk) {
+        window.scene.remove(oldChunk);
+        if (oldChunk.geometry) oldChunk.geometry.dispose();
+    }
+};
+
+window.placeBlock = function(bx, by, bz, blockID = 3, playSound = true) {
+    const key = `${bx},${by},${bz}`;
+
+    // 1. Block data (ID-based system)
+    window.WorldData[key] = {
+        id: blockID
+    };
+
+    if (playSound) console.log(`Sound: block ${blockID} placed.`);
+
+    // 2. Rebuild chunk visuals
+    const cx = Math.floor(bx / 16);
+    const cz = Math.floor(bz / 16);
+
+    const newChunk = Block.generateChunkMesh(cx, cz);
+
+    const oldChunk = window.scene.children.find(c =>
+        c.userData && c.userData.cx === cx && c.userData.cz === cz && c !== newChunk
+    );
+
+    window.scene.add(newChunk);
+
     if (oldChunk) {
         window.scene.remove(oldChunk);
         if (oldChunk.geometry) oldChunk.geometry.dispose();

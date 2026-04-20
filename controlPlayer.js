@@ -56,7 +56,7 @@ class ControlPlayer {
                 this.entity.leftClicking = true;
 
                 if (this.entity.breakCooldown <= 0) {
-                    this.entity.performAction(true);
+                    this.entity.breakBlock();
                     this.entity.breakCooldown = 6;
                 }
             }
@@ -65,7 +65,7 @@ class ControlPlayer {
                 this.entity.rightClicking = true;
 
                 if (this.entity.placeCooldown <= 0) {
-                    this.entity.performAction(false);
+                    this.entity.placeBlock();
                     this.entity.placeCooldown = 4;
                 }
             }
