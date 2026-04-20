@@ -81,6 +81,9 @@ window.skyMat = new THREE.ShaderMaterial({
 window.skyMesh = new THREE.Mesh(skyGeo, window.skyMat);
 window.scene.add(window.skyMesh);
 
+window.skyMesh.renderOrder = 2; // Higher number draws second (on top)
+
+
 // ... rest of your GameWorld class and selectionBox logic
 
 

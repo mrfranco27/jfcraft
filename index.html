@@ -36,6 +36,24 @@
             image-rendering: pixelated;
             pointer-events: none;
         }
+
+        #chatInput {
+    position: absolute;
+    bottom: 3px;           /* Distance from the bottom */
+    left: 5px;             /* Distance from the left */
+    width: 98.8%;           /* Typical MC chat width */
+    height: 24px;
+    background: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    border: none;
+    outline: none;          /* Removes the focus ring */
+    color: white;
+    font-family: 'MinecraftMain', sans-serif; /* If you have the font */
+    font-size: 20px;
+    padding-left: 3px;
+    z-index: 100;           /* Ensures it stays above the canvas */
+    display: none;          /* Hidden by default */
+}
+
     </style>
 </head>
 
@@ -43,11 +61,13 @@
 
     <div id="crosshair"></div>
 
-    <div id="info" style="position: absolute; top: 10px; left: 10px; color: white; background: rgba(0,0,0,0.5); padding: 5px;">
+    <div id="info" style="position: absolute; top: 0; left: 0; color: white; background: rgba(0,0,0,0.5); padding-right: 5px; padding-left: 5px">
         Facing: <span id="dirfacing">N</span><br>
         XYZ: <span id="coords">0 / 0 / 0</span><br>
         Speed: <span id="speed">0.00</span> bps
     </div>
+
+    <input id="chatInput">
 
     <canvas id="game"></canvas>
 
@@ -87,6 +107,10 @@
 
     <!-- Entity NPC (STATE ONLY) -->
     <script src="entityNPC.js"></script>
+
+
+    <script src="commands.js"></script>
+    <script src="chat.js"></script>
 
     <!-- =========================
          4. GAME LOOP

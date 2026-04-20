@@ -138,7 +138,7 @@ placeBlock() {
     ) return;
 
     // 🔥 NEW: use registry instead of string
-    const block = window.BlockRegistry.SOLID.DIRT;
+    const block = window.BlockRegistry.SOLID.COBBLESTONE;
 
     window.placeBlock(bx, by, bz, block.blockID, true);
 }

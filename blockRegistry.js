@@ -11,6 +11,7 @@ window.BlockRegistry = {
     SOLID: {
         GRASS: {
             blockID: 2,
+            opacity: 15,
             tint: { top: true },
             textures: [
                 'assets/minecraft/textures/block/grass_block_side.png',
@@ -32,9 +33,20 @@ window.BlockRegistry = {
 
         DIRT: {
             blockID: 3,
+            opacity: 15,
             tint: null,
             textures: Array(6).fill(
-                'https://raw.githubusercontent.com/mcassets/textures/refs/heads/main/dirt.png'
+                'assets/minecraft/textures/block/dirt.png'
+            ),
+            overlays: Array(6).fill(null)
+        },
+
+        COBBLESTONE: {
+            blockID: 4,
+            opacity: 15,
+            tint: null,
+            textures: Array(6).fill(
+                'assets/minecraft/textures/block/cobblestone.png'
             ),
             overlays: Array(6).fill(null)
         }

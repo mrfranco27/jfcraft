@@ -2,7 +2,6 @@
 class OptionsMenu {
     constructor() {
         this.visible = false;
-        this.guiScale = 2;
         this.buttons = [];
         this.mouseX = 0;
         this.mouseY = 0;
@@ -87,32 +86,34 @@ class OptionsMenu {
     }
 
     show() {
-        this.visible = true;
-        this.inMenu = true;
-        this.canvas.style.display = "block";
-        this.canvas.style.pointerEvents = "auto";
-        if (window.gameMenu) window.gameMenu.visible = false; // Hide main menu background logic if needed
-    }
+    this.visible = true;
+    UI.state.menuOpen = true;
 
+    this.canvas.style.display = "block";
+    this.canvas.style.pointerEvents = "auto";
+}
 
-deactivate() {
+    deactivate() {
     this.visible = false;
+    this.inMenu = false;
     this.canvas.style.display = "none";
     this.canvas.style.pointerEvents = "none";
 }
-    
+
     hide() {
-        this.visible = false;
-        this.canvas.style.display = "none";
-        this.canvas.style.pointerEvents = "none";
-        if (window.gameMenu) window.gameMenu.visible = true; // Return to GameMenu
-    }
+    this.deactivate();
+    UI.state.menuOpen = false;
+
+    const game = document.getElementById("game");
+    if (game) game.requestPointerLock();
+}
 
     loop() {
         requestAnimationFrame(() => this.loop());
         if (!this.visible) return;
 
-        const { ctx, guiScale, canvas, buttons } = this;
+        const { ctx, canvas, buttons } = this;
+        const guiScale = UI.guiScale;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
         // Background overlay
@@ -164,4 +165,4 @@ deactivate() {
 window.optionsMenu = new OptionsMenu();
 
 // Link to GameMenu: Update the Options button in game_menu.js to:
-// new UIButton({ text: "Options...", width: 98, onClick: () => window.optionsMenu.show() })
+// new UIButton({ text: "Options...", width: 98, onClick: () => window.optionsMenu.show() }) done doesn't work

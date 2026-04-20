@@ -3,7 +3,7 @@ const loader = new THREE.TextureLoader();
 
 // Load the skin (64x64 expected)
 const skinTexture = loader.load(
-    'https://raw.githubusercontent.com/mrfranco27/textures/refs/heads/main/steve.png'
+    'https://raw.githubusercontent.com/mrfranco27/textures/refs/heads/main/pickledpeaf.png'
 );
 
 skinTexture.magFilter = THREE.NearestFilter;
