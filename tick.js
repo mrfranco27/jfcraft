@@ -170,6 +170,8 @@ function animate() {
     window.camera.fov = THREE.MathUtils.lerp(window.camera.fov, targetFOV, 1 - Math.exp(-10 * dt));
     window.camera.updateProjectionMatrix();
 
+    
+
     window.renderer.clear();
     window.renderer.render(window.scene, window.camera);
     window.renderer.clearDepth();

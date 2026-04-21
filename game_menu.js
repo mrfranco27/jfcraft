@@ -14,16 +14,23 @@ class GameMenu {
     constructor() {
         this.visible = false;
         this.inMenu = false;
-        this.guiScale = 2;
         this.buttons = [];
         this.mouseX = 0;
         this.mouseY = 0;
+
         this.canvas = document.createElement("canvas");
         this.ctx = this.canvas.getContext("2d");
 
         Object.assign(this.canvas.style, {
-            position: "fixed", left: "0", top: "0", width: "100vw", height: "100vh",
-            zIndex: "100000", display: "none", pointerEvents: "none", imageRendering: "pixelated"
+            position: "fixed",
+            left: "0",
+            top: "0",
+            width: "100vw",
+            height: "100vh",
+            zIndex: "100000",
+            display: "none",
+            pointerEvents: "none",
+            imageRendering: "pixelated"
         });
 
         document.body.appendChild(this.canvas);
@@ -40,75 +47,77 @@ class GameMenu {
     }
 
     setupInput() {
-    // Detect when the browser blocks a pointer lock request
-    document.addEventListener("pointerlockerror", () => {
-        console.warn("Pointer lock blocked by browser cooldown. Retrying in 3s...");
-        
-        // If we are NOT in the menu but the mouse isn't locked, force it in 3s
-        setTimeout(() => {
-            const game = document.getElementById("game");
-            if (!this.visible && game && document.pointerLockElement !== game) {
-                game.requestPointerLock();
-            }
-        }, 3000); 
-    });
+        document.addEventListener("pointerlockerror", () => {
+            console.warn("Pointer lock blocked by browser cooldown. Retrying in 3s...");
+            setTimeout(() => {
+                const game = document.getElementById("game");
+                if (!this.visible && game && document.pointerLockElement !== game) {
+                    game.requestPointerLock();
+                }
+            }, 3000);
+        });
 
-    document.addEventListener("pointerlockchange", () => {
-        const isLocked = document.pointerLockElement !== null;
-        if (!isLocked && !this.visible) this.show();
-    });
+        document.addEventListener("pointerlockchange", () => {
+            const isLocked = document.pointerLockElement !== null;
+            if (!isLocked && !this.visible) this.show();
+        });
 
         this.canvas.addEventListener("mousedown", (e) => {
-    if (!this.visible) return;
-    const rect = this.canvas.getBoundingClientRect();
-    const mx = (e.clientX - rect.left) / this.guiScale;
-    const my = (e.clientY - rect.top) / this.guiScale;
+            if (!this.visible) return;
 
-    for (let item of this.buttons) {
-        if (!item) continue; // Skip null (spacers)
+            const rect = this.canvas.getBoundingClientRect();
+            const mouse = window.uiManager.mouse(e, rect);
 
-        if (item instanceof UIPair) {
-            // Check both buttons inside the pair
-            if (item.btnLeft.contains(mx, my)) item.btnLeft.onClick();
-            if (item.btnRight.contains(mx, my)) item.btnRight.onClick();
-        } else if (item.contains(mx, my)) {
-            // Standard single button
-            item.onClick();
-        }
-    }
-});
+            for (let item of this.buttons) {
+                if (!item) continue;
+
+                if (item instanceof UIPair) {
+                    if (item.btnLeft.contains(mouse.x, mouse.y)) item.btnLeft.onClick();
+                    if (item.btnRight.contains(mouse.x, mouse.y)) item.btnRight.onClick();
+                } else if (item.contains(mouse.x, mouse.y)) {
+                    item.onClick();
+                }
+            }
+        });
 
         this.canvas.addEventListener("mousemove", (e) => {
             const rect = this.canvas.getBoundingClientRect();
-            this.mouseX = e.clientX - rect.left;
-            this.mouseY = e.clientY - rect.top;
+            const mouse = window.uiManager.mouse(e, rect);
+            this.mouseX = mouse.x;
+            this.mouseY = mouse.y;
         });
     }
 
     createButtons() {
         this.buttons = [
             new UIButton({ text: "Back to Game", width: 200, onClick: () => this.hide() }),
-            
-            // Paired block with custom gap (98 + 4 + 98 = 200 total width)
+
             new UIPair(
                 new UIButton({ text: "Achievements", width: 98, disabled: true }),
                 new UIButton({ text: "Statistics", width: 98 }),
-                4 
+                4
             ),
-            
-            null, // Vertical space
-            
-            // Paired block with custom gap (98 + 4 + 98 = 200 total width)
+
+            null,
+
             new UIPair(
-                new UIButton({ text: "Options...", width: 98, onClick: () => {
-            this.deactivate(); // Don't lock mouse, just switch screens
-                    window.optionsMenu.show(); 
-        } }),
+                new UIButton({
+                    text: "Options...",
+                    width: 98,
+                    onClick: () => {
+                        this.deactivate();
+                        window.optionsMenu.show();
+                    }
+                }),
                 new UIButton({ text: "Invite", width: 98, disabled: true }),
                 4
             ),
-            
-            new UIButton({ text: "Save and Quit to Title", width: 200, onClick: () => location.reload() })
+
+            new UIButton({
+                text: "Save and Quit to Title",
+                width: 200,
+                onClick: () => location.reload()
+            })
         ];
     }
 
@@ -120,17 +129,14 @@ class GameMenu {
     }
 
     deactivate() {
-    this.visible = false;
-    this.inMenu = false;
-    this.canvas.style.display = "none";
-    this.canvas.style.pointerEvents = "none";
-}
-
-    hide() {
-        this.deactivate(); // Hide the UI
+        this.visible = false;
         this.inMenu = false;
         this.canvas.style.display = "none";
         this.canvas.style.pointerEvents = "none";
+    }
+
+    hide() {
+        this.deactivate();
         const game = document.getElementById("game");
         if (game) game.requestPointerLock();
     }
@@ -139,14 +145,18 @@ class GameMenu {
         requestAnimationFrame(() => this.loop());
         if (!this.visible) return;
 
-        const { ctx, guiScale, canvas, buttons } = this;
+        const { ctx, canvas, buttons } = this;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "rgba(0, 0, 0, 0.627)";
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        const centerX = (canvas.width / guiScale) / 2;
-        const startY = Math.floor((canvas.height / guiScale) / 4) + 9;
+        const centerX = window.uiManager.centerX(canvas.width);
+        const startY = window.uiManager.centerY(canvas.height) + 9;
         let currentRow = 0;
+
+        const mouseX = this.mouseX;
+        const mouseY = this.mouseY;
 
         buttons.forEach((item) => {
             if (item === null) {
@@ -155,27 +165,28 @@ class GameMenu {
             }
 
             const y = Math.floor(startY + (currentRow * 24));
-            
+
             if (item instanceof UIPair) {
-                const totalPairWidth = item.btnLeft.width + item.pairGap + item.btnRight.width;
-                const pairStartX = centerX - (totalPairWidth / 2);
-                
-                item.btnLeft.x = Math.floor(pairStartX);
+                const total = item.btnLeft.width + item.pairGap + item.btnRight.width;
+                const startX = centerX - total / 2;
+
+                item.btnLeft.x = Math.floor(startX);
                 item.btnLeft.y = y;
-                
-                item.btnRight.x = Math.floor(pairStartX + item.btnLeft.width + item.pairGap);
+
+                item.btnRight.x = Math.floor(startX + item.btnLeft.width + item.pairGap);
                 item.btnRight.y = y;
 
                 [item.btnLeft, item.btnRight].forEach(b => {
-                    b.setHover(b.contains(this.mouseX / guiScale, this.mouseY / guiScale));
-                    b.draw(ctx, guiScale);
+                    b.setHover(b.contains(mouseX, mouseY));
+                    b.draw(ctx);
                 });
             } else {
-                item.x = Math.floor(centerX - (item.width / 2));
+                item.x = Math.floor(centerX - item.width / 2);
                 item.y = y;
-                item.setHover(item.contains(this.mouseX / guiScale, this.mouseY / guiScale));
-                item.draw(ctx, guiScale);
+                item.setHover(item.contains(mouseX, mouseY));
+                item.draw(ctx);
             }
+
             currentRow++;
         });
     }

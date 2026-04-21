@@ -22,12 +22,12 @@ window.BlockRegistry = {
                 'assets/minecraft/textures/block/grass_block_side.png'
             ],
             overlays: [
-                'assets/minecraft/textures/block/grass_side_overlay.png',
-                'assets/minecraft/textures/block/grass_side_overlay.png',
+                'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/textures/block/grass_block_side_overlay.png',
+                'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/textures/block/grass_block_side_overlay.png',
                 null,
                 null,
-                'assets/minecraft/textures/block/grass_side_overlay.png',
-                'assets/minecraft/textures/block/grass_side_overlay.png'
+                'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/textures/block/grass_block_side_overlay.png',
+                'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/textures/block/grass_block_side_overlay.png'
             ]
         },
 
@@ -46,7 +46,7 @@ window.BlockRegistry = {
             opacity: 15,
             tint: null,
             textures: Array(6).fill(
-                'assets/minecraft/textures/block/cobblestone.png'
+                'https://raw.githubusercontent.com/InventivetalentDev/minecraft-assets/1.20/assets/minecraft/textures/block/cobblestone.png'
             ),
             overlays: Array(6).fill(null)
         }
