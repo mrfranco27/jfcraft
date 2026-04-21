@@ -62,7 +62,7 @@ class GameWorld {
         this.seed = Math.floor(Math.random() * 4294967296) - 2147483648;
         // This assumes you have the 'World' class defined in worldgen.js
         this.world = new World(this.seed); 
-        this.renderDistance = 1; // 3x3 chunks
+        this.renderDistance = 0; // 3x3 chunks
         this.initSpawn();
     }
 

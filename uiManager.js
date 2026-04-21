@@ -1,6 +1,6 @@
 class UIManager {
     constructor() {
-        this.guiScale = 3;
+        this.guiScale = 2;
     }
 
     getScale() {
